@@ -54,7 +54,7 @@ Numbering reflects dependency order, not necessarily one-time-only —
 | `05_myc_gt_coexpression.py` | `processed_annotated.h5ad` | figures | MYC/glycotransferase co-detection UpSet plot (malignant cells). |
 | `05b_coexpression_sensitivity.py` | `processed_annotated.h5ad` | figures | MYC + top-2-by-Jaccard glycotransferase co-expression vs. detection threshold. |
 | `06_heatmaps_8q.py` | `cache/adata_t_processed.h5ad`, `cache/pts.pkl` | figures | Per-cell heatmap of all chr8q genes (BioMart-derived gene list, cached). |
-| `99_wip_immune_panel_dotplot.py` | `adata_relabeled.h5ad` | figures | **Work in progress**, not part of the numbered sequence — immune/myeloid marker dotplot pending review. |
+
 
 All figures are written to `results/figures/`.
 
