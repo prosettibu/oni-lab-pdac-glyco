@@ -18,7 +18,7 @@ first run (needs network access) and caches the result locally afterward.
 
 **Raw input** (not included in this repo — too large for git):
 `StdWf1_PRJCA001063_CRC_besca2.raw.h5ad`, expected at the repo root. Source
-accession: **PRJCA001063** 
+accession: **PRJCA001063** Source: Peng et al., Cell Research 2019;29(9):725-738 (doi:10.1038/s41422-019-0195-y). Raw data: GSA/BioProject accession PRJCA001063. Reprocessed via the Besca standard workflow (Zenodo DOI: 10.5281/zenodo.3969339).
 
 **External derived inputs** (vendored in `data/external/`, see
 [`data/external/README.md`](data/external/README.md) for provenance):
