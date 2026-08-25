@@ -1,0 +1,7 @@
+# This repo tracks specific analysis folders within the shared lab directory,
+# not the whole directory. Everything is ignored by default except an
+# explicit allowlist below.
+/*
+!/.gitignore
+!/7_6_scrnaseq
+!/7_22_simyc
