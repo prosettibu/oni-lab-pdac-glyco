@@ -18,9 +18,7 @@ first run (needs network access) and caches the result locally afterward.
 
 **Raw input** (not included in this repo — too large for git):
 `StdWf1_PRJCA001063_CRC_besca2.raw.h5ad`, expected at the repo root. Source
-accession: **PRJCA001063** (per the filename) — confirm/complete this
-citation before publishing; deposit any additional raw files this pipeline
-depends on to GEO/SRA/Zenodo and reference the accession here.
+accession: **PRJCA001063** 
 
 **External derived inputs** (vendored in `data/external/`, see
 [`data/external/README.md`](data/external/README.md) for provenance):
