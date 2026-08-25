@@ -1,0 +1,19 @@
+# Large data files (raw + derived) — not committed. See README.md for how to obtain/regenerate.
+*.h5ad
+cache/*.h5ad
+cache/*.pkl
+
+# Generated figures
+results/figures/*.pdf
+figures/
+newfigures/
+newfigures_7_22/
+
+# Logs and scratch
+logs/
+*.log
+.pybiomart.sqlite
+*.bak
+
+__pycache__/
+*.pyc

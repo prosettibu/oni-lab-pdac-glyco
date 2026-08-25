@@ -2,10 +2,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from upsetplot import UpSet, from_indicators
-
 import scanpy as sc
+from _common import apply_gene_aliases
+
+FIGDIR = 'results/figures'
+
+# --- Load the QC/clustered object (see 01_qc_clustering_annotation.py) —
+# --- needed here for its raw 'counts' layer, which the lighter
+# --- adata_relabeled.h5ad (01b) doesn't carry. ---
 adata = sc.read_h5ad('processed_annotated.h5ad')
-adata.var_names = adata.var_names.where(adata.var_names != 'TSTA3', 'GFUS')
+apply_gene_aliases(adata)  # TSTA3 -> GFUS
 adata_mal = adata[adata.obs['Cell_type'] == 'Malignant ductal cells'].copy()
 
 GENE_PANEL_NO_B3GNT3 = ['MYC', 'HAS2', 'GPAA1', 'ST3GAL1', 'EXT1', 'GFUS']
@@ -25,5 +31,5 @@ upset = UpSet(data, subset_size='count', sort_by='cardinality',
 fig = plt.figure(figsize=(12, 6))
 upset.plot(fig=fig)
 fig.suptitle('MYC / glycotransferase co-detection (no B3GNT3) — malignant ductal cells')
-plt.savefig('/lab/solexa_oni/patrick/7_6_scrnaseq/newfigures/glyco_myc_upset_no_b3gnt3.pdf', bbox_inches='tight')
+plt.savefig(f'{FIGDIR}/glyco_myc_upset_no_b3gnt3.pdf', bbox_inches='tight')
 plt.close('all')

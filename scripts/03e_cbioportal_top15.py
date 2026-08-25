@@ -1,10 +1,11 @@
 import scanpy as sc
 import pandas as pd
+from _common import move_category_first
 
-sc.settings.figdir = './figures'
+sc.settings.figdir = 'results/figures'
 sc.settings.verbosity = 2
 
-# --- Load cached, pre-normalized, relabeled object (see prep.py) ---
+# --- Load the shared, already-normalized/relabeled object (see 01b_quick_relabel.py) ---
 adata = sc.read_h5ad('adata_relabeled.h5ad')
 
 target = 'Malignant ductal cells'
@@ -23,9 +24,7 @@ if missing:
     print('Missing from dataset:', missing)
 
 # --- Move malignant group to front of the groupby axis ---
-adata_t.obs['Cell_type'] = adata_t.obs['Cell_type'].cat.reorder_categories(
-    [target] + [c for c in adata_t.obs['Cell_type'].cat.categories if c != target]
-)
+move_category_first(adata_t, 'Cell_type', target)
 
 # --- Compute pts (fraction of cells expressing) per cell type ---
 sc.tl.rank_genes_groups(adata_t, groupby='Cell_type', method='wilcoxon', pts=True)
@@ -44,4 +43,4 @@ sc.pl.dotplot(adata_t, present_ordered, groupby='Cell_type',
               size_title='Fraction of cells\nexpressing (%)',
               save='_cbioportal_top15_tumor_by_celltype.pdf')
 
-print("Done. Figures in ./figures/")
+print("Done. Figures in results/figures/")

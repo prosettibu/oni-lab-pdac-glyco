@@ -1,16 +1,23 @@
 import scanpy as sc
 import pandas as pd
+from _common import apply_gene_aliases, relabel_cell_types, CELL_TYPE_RENAME
 
-sc.settings.figdir = './figures'
+RAW_H5AD = 'StdWf1_PRJCA001063_CRC_besca2.raw.h5ad'
+OUT_H5AD = 'processed_annotated.h5ad'
+RANDOM_STATE = 0
+
+sc.settings.figdir = 'results/figures'
 sc.settings.verbosity = 2
 
 # --- Load ---
-adata = sc.read_h5ad('StdWf1_PRJCA001063_CRC_besca2.raw.h5ad')
+adata = sc.read_h5ad(RAW_H5AD)
 
-# --- Relabel malignant population ---
-adata.obs['Cell_type'] = adata.obs['Cell_type'].cat.rename_categories(
-    {'Ductal cell type 2': 'Malignant ductal cells'}
-)
+# --- Gene symbol aliases (TSTA3 -> GFUS), applied before any snapshot (layers,
+# --- .raw) is taken so every downstream copy of var_names stays consistent ---
+apply_gene_aliases(adata)
+
+# --- Relabel malignant population (full map: see _common.CELL_TYPE_RENAME) ---
+relabel_cell_types(adata)
 print(adata.obs['Cell_type'].value_counts())
 
 # --- QC overview ---
@@ -23,11 +30,11 @@ sc.pp.normalize_total(adata, target_sum=1e4)
 sc.pp.log1p(adata)
 adata.raw = adata
 
-# --- Dimensionality reduction ---
+# --- Dimensionality reduction (seeded for reproducibility) ---
 sc.pp.highly_variable_genes(adata, n_top_genes=2000)
-sc.pp.pca(adata, n_comps=50)
-sc.pp.neighbors(adata)
-sc.tl.umap(adata)
+sc.pp.pca(adata, n_comps=50, random_state=RANDOM_STATE)
+sc.pp.neighbors(adata, random_state=RANDOM_STATE)
+sc.tl.umap(adata, random_state=RANDOM_STATE)
 sc.pl.umap(adata, color='Cell_type', save='_celltype.pdf')
 
 # --- Marker genes per cell type, with pts (fraction expressing) ---
@@ -65,5 +72,5 @@ sc.pl.dotplot(adata, marker_genes_ordered, groupby='Cell_type',
 sc.pl.dotplot(adata, marker_genes_ordered, groupby=['Cell_type', 'CONDITION'],
               save='_derived_markers_by_condition.pdf', standard_scale='var')
 
-adata.write('processed_annotated.h5ad')
-print("Done. Figures in ./figures, processed object saved.")
+adata.write(OUT_H5AD)
+print(f'Done. Figures in results/figures/, processed object saved to {OUT_H5AD}.')

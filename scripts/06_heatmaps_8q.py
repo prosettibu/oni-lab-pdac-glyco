@@ -4,16 +4,16 @@ import scanpy as sc
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
-sc.settings.figdir = './newfigures_7_22'
-os.makedirs('./newfigures_7_22', exist_ok=True)
+FIGDIR = 'results/figures'
+sc.settings.figdir = FIGDIR
+os.makedirs(FIGDIR, exist_ok=True)
 
-# --- Load cached data (produced by compute_stats.py) ---
-adata_t = sc.read_h5ad('./cache/adata_t_processed.h5ad')
-pts = pd.read_pickle('./cache/pts.pkl')
+# --- Load cached data (produced by 02_compute_specificity_stats.py) ---
+adata_t = sc.read_h5ad('cache/adata_t_processed.h5ad')
+pts = pd.read_pickle('cache/pts.pkl')
 target = 'Malignant ductal cells'
 
 # --- Color scheme: navy blue -> neon green ---
-# Swap the hex codes below if these aren't the exact shades you want.
 navy_neon = LinearSegmentedColormap.from_list('navy_neon', ['#00004D', '#39FF14'])
 
 def plot_percell_heatmap(gene_list, save_name, cmap=navy_neon,
@@ -32,18 +32,29 @@ def plot_percell_heatmap(gene_list, save_name, cmap=navy_neon,
     )
     cbar_ax = axes_dict.get('color_legend_ax') or plt.gcf().axes[-1]
     cbar_ax.set_title(cbar_title, fontsize=10, pad=8)
-    plt.savefig(f'./newfigures_7_22/{save_name}', bbox_inches='tight')
+    plt.savefig(f'{FIGDIR}/{save_name}', bbox_inches='tight')
     plt.close('all')
 
 
-# --- Get all genes on 8q via Ensembl BioMart ---
-biomart = sc.queries.biomart_annotations(
-    'hsapiens',
-    ['external_gene_name', 'chromosome_name', 'band']
-).query("chromosome_name == '8' and band.str.startswith('q')", engine='python')
+# --- Get all genes on 8q via Ensembl BioMart, cached locally after the first
+# --- run so reruns don't depend on network access or on Ensembl's annotation
+# --- content staying identical over time. ---
+GENES_8Q_CACHE = 'cache/genes_8q_biomart.csv'
 
-genes_8q = biomart['external_gene_name'].dropna().unique().tolist()
+if os.path.exists(GENES_8Q_CACHE):
+    genes_8q = pd.read_csv(GENES_8Q_CACHE)['gene'].tolist()
+    print(f'Loaded {len(genes_8q)} chr8q genes from {GENES_8Q_CACHE}')
+else:
+    biomart = sc.queries.biomart_annotations(
+        'hsapiens',
+        ['external_gene_name', 'chromosome_name', 'band']
+    ).query("chromosome_name == '8' and band.str.startswith('q')", engine='python')
+
+    genes_8q = biomart['external_gene_name'].dropna().unique().tolist()
+    os.makedirs('cache', exist_ok=True)
+    pd.DataFrame({'gene': genes_8q}).to_csv(GENES_8Q_CACHE, index=False)
+    print(f'Queried BioMart: {len(genes_8q)} chr8q genes, cached to {GENES_8Q_CACHE}')
 
 plot_percell_heatmap(genes_8q, 'heatmap_8q_percell_vertical.pdf')
 
-print('Done. Figures in ./newfigures_7_22/')
+print(f'Done. Figures in {FIGDIR}/')

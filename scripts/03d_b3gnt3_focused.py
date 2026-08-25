@@ -2,10 +2,12 @@ import scanpy as sc
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from _common import move_category_first
 
-sc.settings.figdir = './figures'
+FIGDIR = 'results/figures'
+sc.settings.figdir = FIGDIR
 
-# --- Load and normalize ---
+# --- Load the shared, already-normalized/relabeled object (see 01b_quick_relabel.py) ---
 adata = sc.read_h5ad('adata_relabeled.h5ad')
 
 # --- Tumor only ---
@@ -16,9 +18,7 @@ assert gene in adata_t.var_names, f"{gene} not found in dataset"
 
 # --- Move malignant group to front of the groupby axis ---
 target = 'Malignant ductal cells'
-adata_t.obs['Cell_type'] = adata_t.obs['Cell_type'].cat.reorder_categories(
-    [target] + [c for c in adata_t.obs['Cell_type'].cat.categories if c != target]
-)
+move_category_first(adata_t, 'Cell_type', target)
 
 # --- Dot plot ---
 sc.pl.dotplot(adata_t, [gene], groupby='Cell_type',
@@ -33,7 +33,7 @@ with plt.rc_context({'figure.figsize': (8, 8)}):
     ax.set_ylabel('Log-normalized expression')
     ax.set_title(gene)
     fig.subplots_adjust(bottom=0.45)
-    fig.savefig('./figures/violin_B3GNT3_tumor_by_celltype.pdf', bbox_inches='tight')
+    fig.savefig(f'{FIGDIR}/violin_B3GNT3_tumor_by_celltype.pdf', bbox_inches='tight')
     plt.close(fig)
 
 # =========================================================================
@@ -83,10 +83,10 @@ cbar.ax.tick_params(labelsize=14)
 cbar.outline.set_linewidth(1.2)
 
 plt.tight_layout()
-plt.savefig('./figures/heatmap_B3GNT3_aggregated_scaled.pdf')
+plt.savefig(f'{FIGDIR}/heatmap_B3GNT3_aggregated_scaled.pdf')
 plt.close()
 
-print("Done. Figures in ./figures/:")
+print(f"Done. Figures in {FIGDIR}/:")
 print(" - dotplot_B3GNT3_tumor_by_celltype.pdf")
 print(" - violin_B3GNT3_tumor_by_celltype.pdf")
 print(" - heatmap_B3GNT3_percell_vertical.pdf   (Option A: per-cell strips)")
